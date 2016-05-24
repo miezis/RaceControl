@@ -11,6 +11,7 @@ class RaceControl {
     //Supporting up to 8 lane tracks
     //Each element will represent lane pin, if it's 0 - it's not active
     int lanes[22];
+    int relayPin;
     //Keep track of last time a car passed the sensing part
     //May cause a bug after 50 days of constant arduino operation
     unsigned long lastTimeCarPassed[22];
@@ -42,7 +43,7 @@ class RaceControl {
     void stopSession();
     void setLane();
     void setMinTime();
-    void testConn();
+    void setPowerRelay();
 
     //Internal methods
     void writeResponse();
@@ -77,8 +78,8 @@ void RaceControl::process() {
     case 3: pauseSession  (); break;
     //!04.
     case 4: stopSession   (); break;
-    //!10.
-    case 10: testConn     (); break;
+    //!0507.
+    case 5: setPowerRelay (); break;
     default:                  break;
   }
 
@@ -111,15 +112,20 @@ void RaceControl::startSession() {
     lastTimeCarPassed[i] = startTime;
     lastReadSensorValues[i] = 0;
   }
+  digitalWrite(relayPin, HIGH);
   sprintf(response, "SS:%lu.", startTime);
 }
 
-void RaceControl::testConn() {
-  sprintf(response, "ACK:%02d.", 1);
+void RaceControl::setPowerRelay() {
+  strncpy(pinStr, request + 2, 2);   pinStr[2] = '\0';
+  relayPin = atol(pinStr);
+  digitalWrite(relayPin, LOW);
+  sprintf(response, "PR:%02d.", relayPin);
 }
 
 void RaceControl::pauseSession() {
   sessionStarted = false;
+  digitalWrite(relayPin, LOW);
 }
 
 void RaceControl::stopSession() {
@@ -129,6 +135,7 @@ void RaceControl::stopSession() {
     lastTimeCarPassed[i] = 0;
     lastReadSensorValues[i] = 0;
   }
+  digitalWrite(relayPin, LOW);
 }
 
 void RaceControl::setLane() {
