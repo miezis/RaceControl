@@ -112,7 +112,7 @@ void RaceControl::startSession() {
     lastTimeCarPassed[i] = startTime;
     lastReadSensorValues[i] = 0;
   }
-  digitalWrite(relayPin, LOW);
+  digitalWrite(relayPin, HIGH);
   sprintf(response, "SS:%lu.", startTime);
 }
 
@@ -120,13 +120,13 @@ void RaceControl::setPowerRelay() {
   strncpy(pinStr, request + 2, 2);   pinStr[2] = '\0';
   relayPin = atol(pinStr);
   pinMode(relayPin, OUTPUT);
-  digitalWrite(relayPin, HIGH);
+  digitalWrite(relayPin, LOW);
   sprintf(response, "PR:%02d.", relayPin);
 }
 
 void RaceControl::pauseSession() {
   sessionStarted = false;
-  digitalWrite(relayPin, HIGH);
+  digitalWrite(relayPin, LOW);
 }
 
 void RaceControl::stopSession() {
@@ -136,7 +136,7 @@ void RaceControl::stopSession() {
     lastTimeCarPassed[i] = 0;
     lastReadSensorValues[i] = 0;
   }
-  digitalWrite(relayPin, HIGH);
+  digitalWrite(relayPin, LOW);
 }
 
 void RaceControl::setLane() {
